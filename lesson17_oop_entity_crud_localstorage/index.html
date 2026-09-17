@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="./script.js" defer></script>
+</head>
+
+<body>
+    <main class="container">
+        <header>
+            <h1>Каталог растений</h1>
+        </header>
+        <section>
+            <h2>Добавление растений</h2>
+            <form id="plant-form">
+                <div class="form-group">
+                    <label for="">Выберите тип:</label>
+                    <select name="" id="plant-type-select">
+                        <option value="fern">Папоротник</option>
+                        <option value="spruse">Ель обыкновенная</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="plant-name-input">Название:</label>
+                    <input type="text" name="" id="plant-name-input">
+                </div>
+                <div class="form-group">
+                    <label for="plant-age-input">Возраст (лет):</label>
+                    <input type="number" name="" id="plant-age-input">
+                </div>
+                <div class="form-group">
+                    <label for="plant-area-input">Ареал:</label>
+                    <input type="text" name="" id="plant-area-input">
+                </div>
+                <div class="form-group-checkbox">
+                    <input type="checkbox" name="" id="plant-is-toxic-checkbox">
+                    <label for="plant-is-toxic">Ядовитое</label>
+                </div>
+                <div class="dynamic-fields">
+
+                </div>
+                <button type="submit" id="save-btn">Сохранить</button>
+            </form>
+        </section>
+        <section>
+            <h2>Список объектов</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Тип</th>
+                            <th>Название</th>
+                            <th>Возраст</th>
+                            <th>Ареал</th>
+                            <th>Ядовито</th>
+                            <th>Доп. инфо</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>
