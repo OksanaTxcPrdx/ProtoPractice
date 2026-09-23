@@ -1,20 +1,33 @@
 const plantSelect = document.getElementById('plant-type-select');
 const plantForm = document.getElementById('plant-form');
-// const plantNameInput = document.getElementById('plant-name-input');
-// const plantAgeInput = document.getElementById('plant-age-input');
-// const plantAreaInput = document.getElementById('plant-area-input');
-// const plantIsToxicChb = document.getElementById('plant-is-toxic-checkbox');
 const dynamicFields = document.querySelector('.dynamic-fields');
 const saveBtn = document.getElementById('save-btn');
-const plantsTable = document.querySelector('table');
+const plantsTableBody = document.querySelector('table>tbody');
+console.log(plantsTableBody);
+const PLANTS = [];
 
 class Plant {
 
-    constructor({ name, age, area, isToxic }) {
+    constructor({ id, type, name, age, area, isToxic }) {
+        this._id = id;
+        this._type = type;
         this._name = name;
         this._age = age;
         this._area = area;
         this._isToxic = isToxic;
+    }
+
+    get id() {
+        return this._id;
+    }
+    set id(value) {
+        this._id = value;
+    }
+    get type() {
+        return this._type;
+    }
+    set type(value) {
+        this._type = value;
     }
 
     get name() {
@@ -135,6 +148,8 @@ const renderDynamicFields = function () {
 const collectPlantData = function () {
     let colectedPlantData = {};
     let selectedPlant = plantSelect.selectedOptions[0].value;
+    colectedPlantData['type'] = selectedPlant;
+    colectedPlantData['id'] = crypto.randomUUID();
     let PlantClass = PLANT_CONFIGS[selectedPlant].plantClass;
 
     let inputsList = plantForm.querySelectorAll('input');
@@ -147,28 +162,102 @@ const collectPlantData = function () {
             colectedPlantData[input.name] = input.value;
         }
     })
-    console.log(colectedPlantData);
-    let newPlant = new PlantClass(colectedPlantData);
-    console.log(newPlant);
+
+    return colectedPlantData;
 }
 
-const onload = function () {
-    document.addEventListener('DOMContentLoaded', renderDynamicFields);
-
-    plantSelect.addEventListener('change', renderDynamicFields);
-    //plantSelect.addEventListener('change', collectPlantData);
-    saveBtn.addEventListener('click', () => {
-        event.preventDefault();
-        collectPlantData();
+const clearInputs = function () {
+    let inputsList = plantForm.querySelectorAll('input');
+    inputsList.forEach(input => {
+        if (input.type === 'checkbox') {
+            input.checked = false;
+        } else {
+            input.value = '';
+        }
     })
 }
 
 
 
-// console.dir(plantSelect);
+const setPlantsLT = function (plant) {
 
-// const plant = new Plant();
-// const fern = new Fern();
-// const spruse = new Spruse();
+    let jsonPlant = JSON.stringify(plant);
+    localStorage.setItem(plant.id, jsonPlant);
+}
+
+const getLocalStorage = function () {
+    PLANTS.length = 0;
+    let plantObjArr = [];
+    let keys = Object.keys(localStorage);
+    for (let key of keys) {
+        plantObjArr.push(JSON.parse(localStorage.getItem(key)));
+    }
+    plantObjArr.forEach((plant) => {
+        let plantType = plant.type;
+        let PlantClass = PLANT_CONFIGS[plantType].plantClass;
+        PLANTS.push(new PlantClass(plant));
+    })
+    console.log(PLANTS);
+}
+
+const getInfoForTable = function (plant) {
+    // let type = plant.type;
+    // let name = plant.name;
+    // let age = plant.age;
+    // let area = plant.area;
+    let isToxic = plant.isToxic.checked ? 'Да' : 'Нет';
+    let extraInfo = {};
+    let extraInfoText = '';
+    let configs = PLANT_CONFIGS[plant.type];
+    configs.fields.forEach((field) => {
+        extraInfo[field.name] = plant[field.name];
+    })
+    console.log(extraInfo);
+    configs.fields.forEach((field) => {
+        extraInfoText += `${field.label} ${extraInfo[field.name]}.\n`
+    })
+    console.log(extraInfoText);
+
+    return [plant.type, plant.name, plant.age, plant.area, isToxic, extraInfoText]
+}
+
+const renderTable = function () {
+    getLocalStorage();
+    console.log(plantsTableBody);
+    console.dir(plantsTableBody);
+    PLANTS.forEach((plant) => {
+
+        let infoArrRow = getInfoForTable(plant);
+        let newTr = document.createElement('tr');
+        plantsTableBody.append(newTr);
+        console.log(plant);
+
+        infoArrRow.forEach((infoPoint) => {
+            let newData = document.createElement('td');
+            newData.textContent = `${infoPoint}`;
+            newTr.append(newData);
+        })
+
+        let btnWrap = document.createElement('td');
+        let deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Удалить';
+        btnWrap.append(deleteBtn);
+        newTr.append(btnWrap);
+
+    })
+}
+
+const onload = function () {
+    document.addEventListener('DOMContentLoaded', renderDynamicFields);
+    document.addEventListener('DOMContentLoaded', renderTable);
+
+    plantSelect.addEventListener('change', renderDynamicFields);
+    plantForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        setPlantsLT(collectPlantData());
+        clearInputs();
+    })
+}
+
 
 onload();
