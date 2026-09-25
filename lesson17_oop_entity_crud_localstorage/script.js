@@ -3,8 +3,8 @@ const plantForm = document.getElementById('plant-form');
 const dynamicFields = document.querySelector('.dynamic-fields');
 const saveBtn = document.getElementById('save-btn');
 const plantsTableBody = document.querySelector('table>tbody');
-console.log(plantsTableBody);
 const PLANTS = [];
+let deleteBtns;
 
 class Plant {
 
@@ -91,6 +91,7 @@ class Spruse extends Plant {
 const PLANT_CONFIGS = {
     fern: {
         plantClass: Fern,
+        plantClassName: 'Папоротник',
         fields: [
             {
                 name: 'fondsLength',
@@ -108,6 +109,7 @@ const PLANT_CONFIGS = {
     },
     spruse: {
         plantClass: Spruse,
+        plantClassName: 'Ель обыкновенная',
         fields: [
             {
                 name: 'needlsLength',
@@ -197,14 +199,10 @@ const getLocalStorage = function () {
         let PlantClass = PLANT_CONFIGS[plantType].plantClass;
         PLANTS.push(new PlantClass(plant));
     })
-    console.log(PLANTS);
 }
 
 const getInfoForTable = function (plant) {
-    // let type = plant.type;
-    // let name = plant.name;
-    // let age = plant.age;
-    // let area = plant.area;
+    let plantType = PLANT_CONFIGS[plant.type].plantClassName;
     let isToxic = plant.isToxic.checked ? 'Да' : 'Нет';
     let extraInfo = {};
     let extraInfoText = '';
@@ -212,25 +210,21 @@ const getInfoForTable = function (plant) {
     configs.fields.forEach((field) => {
         extraInfo[field.name] = plant[field.name];
     })
-    console.log(extraInfo);
     configs.fields.forEach((field) => {
         extraInfoText += `${field.label} ${extraInfo[field.name]}.\n`
     })
-    console.log(extraInfoText);
 
-    return [plant.type, plant.name, plant.age, plant.area, isToxic, extraInfoText]
+    return [plantType, plant.name, plant.age, plant.area, isToxic, extraInfoText]
 }
 
 const renderTable = function () {
     getLocalStorage();
-    console.log(plantsTableBody);
-    console.dir(plantsTableBody);
+    plantsTableBody.textContent = '';
     PLANTS.forEach((plant) => {
 
         let infoArrRow = getInfoForTable(plant);
         let newTr = document.createElement('tr');
         plantsTableBody.append(newTr);
-        console.log(plant);
 
         infoArrRow.forEach((infoPoint) => {
             let newData = document.createElement('td');
@@ -241,22 +235,41 @@ const renderTable = function () {
         let btnWrap = document.createElement('td');
         let deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Удалить';
+        deleteBtn.classList.add('delete-btn');
+        deleteBtn.name = `${plant.id}`;
         btnWrap.append(deleteBtn);
         newTr.append(btnWrap);
 
     })
+    deleteBtns = document.querySelectorAll('.delete-btn') || [];
+    deleteBtns.forEach(btn => {
+        btn.addEventListener('click', event => {
+            deleteFromTable(event.target.name);
+            renderTable();
+        })
+    })
+
+}
+
+const deleteFromTable = function (id) {
+    localStorage.removeItem(id);
 }
 
 const onload = function () {
+
     document.addEventListener('DOMContentLoaded', renderDynamicFields);
     document.addEventListener('DOMContentLoaded', renderTable);
+    // console.log(deleteBtns);
 
     plantSelect.addEventListener('change', renderDynamicFields);
     plantForm.addEventListener('submit', (event) => {
         event.preventDefault();
         setPlantsLT(collectPlantData());
         clearInputs();
+        renderTable()
     })
+
+
 }
 
 
