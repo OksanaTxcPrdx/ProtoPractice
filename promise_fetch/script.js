@@ -1,23 +1,33 @@
 let url = 'https://jsonplaceholder.typicode.com/posts';
 
 
-const getData = (jsonFileData) => {
-    jsonFileData.then(response => response.json())
-        .then(data => data)
+const getData = (jsonFilePath) => {
+    return fetch(jsonFilePath)
+     .then(response => {
+        if(!response.ok){
+            throw new Error(`Ошибка при чтении файла: ${response.status}`);
+        }
+        return response.json()
+     })
         .catch(err => console.log(err));
 }
 
 const sendData = (data, url) => {
-    fetch(url, {
+    return fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json;charset=utf-8'
         },
-        body: data
+        body: JSON.stringify(data)
     })
-        .then(response => response.json())
-        .then(users => console.log(users))
+    .then(response => {
+        if (!response.ok){
+            throw new Error(`Ошибка при отправке данных ${response.status}`)
+        }
+        return response.json()})
+    .catch(err => console.log(err))
 }
 
-let data = getData(fetch('db.json'));
-sendData(data, url);
+getData('db.json')
+.then(response=> console.log(sendData(response, url)))
+.catch(err => console.log(err));
